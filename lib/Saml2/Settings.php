@@ -40,6 +40,13 @@ class OneLogin_Saml2_Settings
      *
      * @var array
      */
+    private $_ds = array();
+
+    /**
+     * SP data.
+     *
+     * @var array
+     */
     private $_sp = array();
 
     /**
@@ -234,6 +241,9 @@ class OneLogin_Saml2_Settings
      */
     private function _loadSettingsFromArray($settings)
     {
+        if (isset($settings['ds'])) {
+            $this->_ds = $settings['ds'];
+        }
         if (isset($settings['sp'])) {
             $this->_sp = $settings['sp'];
         }
@@ -444,6 +454,9 @@ class OneLogin_Saml2_Settings
             $spErrors = $this->checkSPSettings($settings);
             $errors = array_merge($spErrors, $errors);
 
+            $dsErrors = $this->checkDSSettings($settings);
+            $errors = array_merge($dsErrors, $errors);
+
             $compressErrors = $this->checkCompressionSettings($settings);
             $errors = array_merge($compressErrors, $errors);
         }
@@ -540,6 +553,35 @@ class OneLogin_Saml2_Settings
                 ) {
                     $errors[] = 'idp_cert_not_found_and_required';
                 }
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Checks the IdP settings info.
+     *
+     * @param array $settings Array with settings data
+     *
+     * @return array $errors  Errors found on the IdP settings data
+     */
+    public function checkDSSettings($settings)
+    {
+        assert('is_array($settings)');
+
+        if (!is_array($settings) || empty($settings)) {
+            return array('invalid_syntax');
+        }
+
+        $errors = array();
+
+        if (!isset($settings['ds']) || empty($settings['ds'])) {
+            $errors[] = 'ds_not_found';
+        } else {
+            $ds = $settings['ds'];
+            if (!isset($ds['url']) || empty($ds['url'])) {
+                $errors[] = 'ds_url_not_found';
             }
         }
 
@@ -717,6 +759,16 @@ class OneLogin_Saml2_Settings
     public function getSPData()
     {
         return $this->_sp;
+    }
+
+    /**
+     * Gets the DS data.
+     *
+     * @return array  DS info
+     */
+    public function getDSData()
+    {
+        return $this->_ds;
     }
 
     /**
@@ -994,5 +1046,14 @@ class OneLogin_Saml2_Settings
     {
       $this->_idp['x509cert'] = $cert;
       $this->formatIdPCert();
+    }
+
+    /**
+     * Override IdP data after IdP is chosen from DS.
+     *
+     * @param array $idpData
+     */
+    public function setIDPData($idpData){
+        $this->_idp = $idpData;
     }
 }

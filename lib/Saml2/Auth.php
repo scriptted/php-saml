@@ -139,6 +139,16 @@ class OneLogin_Saml2_Auth
     }
 
     /**
+     * Override settings
+     *
+     * @param OneLogin_Saml2_Settings The settings data.
+     */
+    public function setSettings($settings)
+    {
+        $this->_settings = $settings;
+    }
+
+    /**
      * Set the strict mode active/disable
      *
      * @param bool $value Strict parameter
@@ -669,7 +679,7 @@ class OneLogin_Saml2_Auth
                 $response = $this->_lastResponse->saveXML();
             }
         }
-        
+
         return $response;
     }
 }
